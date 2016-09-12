@@ -1,0 +1,26 @@
+{
+  "name": "raytracer",
+  "version": "1.0.0",
+  "description": "A simple raytracer",
+  "main": "src/index.js",
+  "dependencies": {
+    "jasmine-node": "^1.14.5"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^3.0.2"
+  },
+  "scripts": {
+    "test": "mocha test --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maryrosecook/raytracer.git"
+  },
+  "author": "\"Mary Rose Cook <mary@maryrosecook.com> (https://maryrosecook.com/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/maryrosecook/raytracer/issues"
+  },
+  "homepage": "https://github.com/maryrosecook/raytracer#readme"
+}
