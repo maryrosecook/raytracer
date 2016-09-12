@@ -8,10 +8,12 @@
   },
   "devDependencies": {
     "chai": "^3.5.0",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "webpack": "^1.13.2"
   },
   "scripts": {
-    "test": "mocha test --watch"
+    "test": "mocha test --watch",
+    "watch": "webpack --progress --colors --watch"
   },
   "repository": {
     "type": "git",

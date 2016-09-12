@@ -1,3 +1,3 @@
-;(function(exports) {
-  new Raytracer(document.getElementById("screen"));
-})(this);
+var World = require("./world");
+
+new World(document.getElementById("screen"));
