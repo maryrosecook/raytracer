@@ -5,9 +5,12 @@ var checkObjectAttributes =
   function Sphere(options) {
     checkObjectAttributes(options, ["x", "y", "z", "radius"]);
 
-    this.x = options.x;
-    this.y = options.y;
-    this.z = options.z;
+    this.center = {
+      x: options.x,
+      y: options.y,
+      z: options.z
+    };
+
     this.radius = options.radius;
   };
 

@@ -36,7 +36,10 @@ describe("sphere", function() {
 
     it("should create sphere with x, y, z and radius", function() {
       var sphere = new Sphere({ x: 1, y: 2, z: 3, radius: 4 });
-      expect(sphere.x).to.equal(1);
+      expect(sphere.center.x).to.equal(1);
+      expect(sphere.center.y).to.equal(2);
+      expect(sphere.center.z).to.equal(3);
+      expect(sphere.radius).to.equal(4);
     });
   });
 });
