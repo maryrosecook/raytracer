@@ -83,21 +83,25 @@ describe("ray", function() {
     });
   });
 
-  // describe("#isIntersecting", function() {
-  //   it("should ret true for ray thru sphere center", function() {
-  //     var ray = new Ray({
-  //       origin: { x: 0, y: 200, z: 200 },
-  //       direction: { x: 1, y: 0, z: 0 }
-  //     });
+  describe("#isIntersecting", function() {
+    it("should return true for ray through sphere", function() {
+      var ray = new Ray({
+        origin: { x: 50, y: 200, z: 200 },
+        direction: {
+          x: 0.9284766908852593,
+          y: -0.3713906763541037,
+          z: 0
+        }
+      });
 
-  //     var sphere = new Sphere({
-  //       x: 200,
-  //       y: 200,
-  //       z: 200,
-  //       radius: 100
-  //     });
+      var sphere = new Sphere({
+        x: 200,
+        y: 200,
+        z: 200,
+        radius: 100
+      });
 
-  //     expect(ray.isIntersecting(sphere)).to.equal(true);
-  //   });
-  // });
+      expect(ray.isIntersecting(sphere)).to.equal(true);
+    });
+  });
 });
