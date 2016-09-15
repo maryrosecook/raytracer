@@ -1,18 +1,11 @@
-var checkObjectAttributes =
-    require("./check-object-attributes").checkObjectAttributes;
+var checkObjectAttributes = require("./check-object-attributes");
 
-;(function(exports) {
-  function Sphere(options) {
-    checkObjectAttributes(options, ["x", "y", "z", "radius"]);
+function Sphere(options) {
+  checkObjectAttributes(options, ["center", "radius"]);
+  checkObjectAttributes(options.center, ["x", "y", "z"]);
 
-    this.center = {
-      x: options.x,
-      y: options.y,
-      z: options.z
-    };
+  this.center = options.center.copy();
+  this.radius = options.radius;
+};
 
-    this.radius = options.radius;
-  };
-
-  exports.Sphere = Sphere;
-})(this);
+module.exports = Sphere;

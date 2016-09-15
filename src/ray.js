@@ -1,65 +1,54 @@
-var checkObjectAttributes =
-    require("./check-object-attributes").checkObjectAttributes;
+var checkObjectAttributes = require("./check-object-attributes");
 
-;(function(exports) {
-  function Ray(options) {
-    checkObjectAttributes(options, ["origin", "direction"]);
-    checkObjectAttributes(options.origin, ["x", "y", "z"]);
-    checkObjectAttributes(options.direction, ["x", "y", "z"]);
+function Ray(options) {
+  checkObjectAttributes(options, ["origin", "direction"]);
 
-    this.origin = options.origin;
-    this.direction = options.direction;
-  };
+  this.origin = options.origin.copy();
+  this.direction = options.direction.copy();
+};
 
-  Ray.prototype = {
-    isIntersecting: function(sphere) {
-      return this._minimumDistanceFromRayToSphereCenter(sphere) <=
-        sphere.radius;
-    },
-      // var thc = Math.sqrt(Math.pow(sphere.radius, 2) -
-      //                     Math.pow(d, 2));
+Ray.prototype = {
+  isIntersecting: function(sphere) {
+    return this._distanceRayToSphereCenter(sphere) <=
+      sphere.radius;
+  },
 
-    _minimumDistanceFromRayToSphereCenter: function(sphere) {
-      // for what letters mean, see Mary's notebook
-      var D = this.direction;
-      var Lvector = subtract(sphere.center, this.origin);
-      var Lmagnitude = magnitude(Lvector);
-      var tca = dotProduct(Lvector, D);
-      var d = Math.sqrt(Math.pow(Lmagnitude, 2) -
-                        Math.pow(tca, 2));
-      return d;
+  intersectionPoint: function(sphere) {
+    if (!this.isIntersecting(sphere)) {
+      throw new Error("Not intersecting");
     }
-  };
 
+    var intersectionDistanceAlongRay = this._tca(sphere) -
+        this._thc(sphere);
 
-  function subtract(vector1, vector2) {
-    return {
-      x: vector1.x - vector2.x,
-      y: vector1.y - vector2.y,
-      z: vector1.z - vector2.z
-    };
-  };
+    return this.origin.add(
+      this.direction.multiplyByScalar(intersectionDistanceAlongRay));
+  },
 
-  function magnitude(vector) {
-    return Math.sqrt(vector.x * vector.x +
-                     vector.y * vector.y +
-                     vector.z * vector.z);
-  };
+  _distanceRayToSphereCenter: function(sphere) {
+    var lMagnitude =
+      this._sphereCenterToRayOriginVector(sphere).magnitude();
 
-  function normalise(vector) {
-    var vectorMagnitude = magnitude(vector);
-    return {
-      x: vector.x / vectorMagnitude,
-      y: vector.y / vectorMagnitude,
-      z: vector.z / vectorMagnitude
-    };
-  };
+    return Math.sqrt(Math.pow(lMagnitude, 2) -
+                     Math.pow(this._tca(sphere), 2));
+  },
 
-  function dotProduct(vector1, vector2) {
-    return vector1.x * vector2.x +
-      vector1.y * vector2.y +
-      vector1.z * vector2.z;
-  };
+  _sphereCenterToRayOriginVector: function(sphere) {
+    return sphere.center.subtract(this.origin);
+  },
 
-  exports.Ray = Ray;
-})(this);
+  _tca: function(sphere) {
+    return this._sphereCenterToRayOriginVector(sphere)
+      .dotProduct(this.direction);
+  },
+
+  _thc: function(sphere) {
+    var distanceRayToSphereCenter =
+        this._distanceRayToSphereCenter(sphere);
+
+    return Math.sqrt(Math.pow(sphere.radius, 2) -
+                     Math.pow(distanceRayToSphereCenter, 2));
+  }
+};
+
+module.exports = Ray;
