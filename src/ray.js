@@ -26,10 +26,10 @@ Ray.prototype = {
   },
 
   _distanceRayToSphereCenter: function(sphere) {
-    var lMagnitude =
+    var sphereCenterToRayOriginLength =
       this._sphereCenterToRayOriginVector(sphere).magnitude();
 
-    return Math.sqrt(Math.pow(lMagnitude, 2) -
+    return Math.sqrt(Math.pow(sphereCenterToRayOriginLength, 2) -
                      Math.pow(this._tca(sphere), 2));
   },
 
