@@ -61,6 +61,28 @@ describe("ray", function() {
 
       expect(ray.isIntersecting(sphere)).to.equal(true);
     });
+
+    it("returns false if ray points away from sphere", function() {
+      var ray = new Ray({
+        origin: new Vector({ x: 50, y: 200, z: 200 }),
+        direction: new Vector({
+          x: -0.9063077870366497,
+          y: 0.42261826174069994,
+          z: 0
+        })
+      });
+
+      var sphere = new Sphere({
+        center: new Vector({
+          x: 200,
+          y: 200,
+          z: 200,
+        }),
+        radius: 100
+      });
+
+      expect(ray.isIntersecting(sphere)).to.equal(false);
+    });
   });
 
   describe("#intersectionPoint", function() {
@@ -90,13 +112,6 @@ describe("ray", function() {
           y: 179.1181789999971,
           z: 200
         }));
-    });
-
-    it("should ret first intersection for neg direction", function() {
-      // investigate what intersectionDistanceAlongRay 1 and 2 are
-      // when ray is pointing in different directions - may need to
-      // adjust values
-      throw "";
     });
   });
 });

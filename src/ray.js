@@ -10,7 +10,8 @@ function Ray(options) {
 Ray.prototype = {
   isIntersecting: function(sphere) {
     return this._distanceRayToSphereCenter(sphere) <=
-      sphere.radius;
+      sphere.radius &&
+      this._intersectionDistanceAlongRay(sphere) >= 0;
   },
 
   intersectionPoint: function(sphere) {
@@ -18,8 +19,8 @@ Ray.prototype = {
       throw new Error("Not intersecting");
     }
 
-    var intersectionDistanceAlongRay = this._tca(sphere) -
-        this._thc(sphere);
+    var intersectionDistanceAlongRay =
+        this._intersectionDistanceAlongRay(sphere);
 
     return this.origin.add(
       this.direction.multiplyByScalar(intersectionDistanceAlongRay));
@@ -27,10 +28,14 @@ Ray.prototype = {
 
   _distanceRayToSphereCenter: function(sphere) {
     var sphereCenterToRayOriginLength =
-      this._sphereCenterToRayOriginVector(sphere).magnitude();
+        this._sphereCenterToRayOriginVector(sphere).magnitude();
 
     return Math.sqrt(Math.pow(sphereCenterToRayOriginLength, 2) -
                      Math.pow(this._tca(sphere), 2));
+  },
+
+  _intersectionDistanceAlongRay: function(sphere) {
+    return this._tca(sphere) - this._thc(sphere);
   },
 
   _sphereCenterToRayOriginVector: function(sphere) {
