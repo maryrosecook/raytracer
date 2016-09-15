@@ -68,9 +68,11 @@ Vector.prototype = {
   normalize: function() {
     this.checkIsValid();
     var vectorMagnitude = this.magnitude();
-    this.x /= vectorMagnitude;
-    this.y /= vectorMagnitude;
-    this.z /= vectorMagnitude;
+    return new Vector({
+      x: this.x / vectorMagnitude,
+      y: this.y / vectorMagnitude,
+      z: this.z / vectorMagnitude,
+    });
   },
 
   dotProduct: function(vector) {

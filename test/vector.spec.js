@@ -182,9 +182,9 @@ describe("vector", function() {
     it("should normalize vector", function() {
       var vector = new Vector({ x: 1, y: 2, z: 3 });
       var newVector = vector.normalize();
-      expect(vector.x).to.equal(0.2672612419124244);
-      expect(vector.y).to.equal(0.5345224838248488);
-      expect(vector.z).to.equal(0.8017837257372732);
+      expect(newVector.x).to.equal(0.2672612419124244);
+      expect(newVector.y).to.equal(0.5345224838248488);
+      expect(newVector.z).to.equal(0.8017837257372732);
     });
   });
 
