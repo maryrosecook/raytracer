@@ -13,7 +13,8 @@
   },
   "scripts": {
     "test": "mocha test --watch",
-    "watch": "webpack --progress --colors --watch"
+    "watch-raytracer": "webpack --config webpack-raytracer.config.js --progress --colors --watch",
+    "watch-scene-to-2d": "webpack --config webpack-scene-to-2d.config.js --progress --colors --watch"
   },
   "repository": {
     "type": "git",
