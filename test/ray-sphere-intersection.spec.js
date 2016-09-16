@@ -10,22 +10,16 @@ describe("RaySphereIntersection", function() {
     it("should throw if missing no options passed", function() {
       expect(function() {
         new RaySphereIntersection();
-      }).to.throw("Requires object");
+      }).to.throw("Requires ray");
     });
 
-    it("should throw if missing origin", function() {
+    it("should throw if missing sphere", function() {
       expect(function() {
         new RaySphereIntersection({});
-      }).to.throw("Requires ray option");
+      }).to.throw("Requires sphere");
     });
 
-    it("should throw if missing origin", function() {
-      expect(function() {
-        new RaySphereIntersection({ ray: {} });
-      }).to.throw("Requires sphere option");
-    });
-
-    it("should create ray with origin and direction", function() {
+    it("creates intersection with ray and sphere", function() {
       var ray = new Ray({
         origin: new Vector({ x: 1, y: 2, z: 3 }),
         direction: new Vector({ x: 4, y: 5, z: 6 })
@@ -41,7 +35,7 @@ describe("RaySphereIntersection", function() {
       });
 
       var raySphereIntersection =
-          new RaySphereIntersection({ ray: ray, sphere: sphere });
+          new RaySphereIntersection(ray, sphere);
 
       expect(raySphereIntersection.ray).to.eql(ray);
       expect(raySphereIntersection.sphere).to.eql(sphere);
@@ -68,9 +62,8 @@ describe("RaySphereIntersection", function() {
         radius: 100
       });
 
-      var raySphereIntersection =
-          new RaySphereIntersection({ ray: ray, sphere: sphere });
-      expect(raySphereIntersection.exists()).to.equal(true);
+      expect(new RaySphereIntersection(ray, sphere).exists())
+        .to.equal(true);
     });
 
     it("returns false if ray points away from sphere", function() {
@@ -92,10 +85,8 @@ describe("RaySphereIntersection", function() {
         radius: 100
       });
 
-      var raySphereIntersection =
-          new RaySphereIntersection({ ray: ray, sphere: sphere });
-      expect(raySphereIntersection.exists()).to.equal(false);
-
+      expect(new RaySphereIntersection(ray, sphere).exists())
+        .to.equal(false);
     });
   });
 
@@ -120,10 +111,7 @@ describe("RaySphereIntersection", function() {
         radius: 100
       });
 
-      var raySphereIntersection =
-          new RaySphereIntersection({ ray: ray, sphere: sphere });
-
-      expect(raySphereIntersection.point())
+      expect(new RaySphereIntersection(ray, sphere).point())
         .to.eql(new Vector({
           x: 102.20455250000724,
           y: 179.1181789999971,

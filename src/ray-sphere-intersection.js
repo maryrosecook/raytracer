@@ -1,10 +1,16 @@
 var checkObjectAttributes = require("./check-object-attributes");
 
-function RaySphereIntersection(options) {
-  checkObjectAttributes(options, ["ray", "sphere"]);
+function RaySphereIntersection(ray, sphere) {
+  if (!ray) {
+    throw new Error("Requires ray");
+  }
 
-  this.ray = options.ray;
-  this.sphere = options.sphere;
+  if (!sphere) {
+    throw new Error("Requires sphere");
+  }
+
+  this.ray = ray;
+  this.sphere = sphere;
 };
 
 RaySphereIntersection.prototype = {

@@ -121,17 +121,19 @@
 	
 	function entitiesToDraw(ray, sphere, lightSphere) {
 	  var entities = [
-	    new DrawableEntity(sphere, { strokeStyle: "black", zindex: 1 }),
+	    new DrawableEntity(sphere, {
+	      strokeStyle: "black",
+	      zindex: 1
+	    }),
+	
 	    new DrawableEntity(lightSphere, {
 	      fillStyle: "yellow",
 	      zindex: 1
 	    })
 	  ];
 	
-	  var raySphereIntersection = new RaySphereIntersection({
-	    ray: ray,
-	    sphere: sphere
-	  });
+	  var raySphereIntersection =
+	      new RaySphereIntersection(ray, sphere);
 	
 	  if (raySphereIntersection.exists()) {
 	    var shadowRay = generateShadowRay(raySphereIntersection.point(),
@@ -146,16 +148,12 @@
 	      zindex: 1
 	    }));
 	
-	    var shadowRaySphereIntersection = new RaySphereIntersection({
-	      ray: shadowRay,
-	      sphere: sphere
-	    });
+	    var shadowRaySphereIntersection =
+	        new RaySphereIntersection(shadowRay, sphere);
 	
 	    if (!shadowRaySphereIntersection.exists()) {
-	      var shadowRayLightIntersection = new RaySphereIntersection({
-	        ray: shadowRay,
-	        sphere: lightSphere
-	      });
+	      var shadowRayLightIntersection =
+	          new RaySphereIntersection(shadowRay, lightSphere);
 	
 	      entities.push(new DrawableEntity(
 	        shadowRayLightIntersection.point(), {
@@ -373,11 +371,17 @@
 
 	var checkObjectAttributes = __webpack_require__(2);
 	
-	function RaySphereIntersection(options) {
-	  checkObjectAttributes(options, ["ray", "sphere"]);
+	function RaySphereIntersection(ray, sphere) {
+	  if (!ray) {
+	    throw new Error("Requires ray");
+	  }
 	
-	  this.ray = options.ray;
-	  this.sphere = options.sphere;
+	  if (!sphere) {
+	    throw new Error("Requires sphere");
+	  }
+	
+	  this.ray = ray;
+	  this.sphere = sphere;
 	};
 	
 	RaySphereIntersection.prototype = {

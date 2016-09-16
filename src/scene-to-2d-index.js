@@ -75,17 +75,19 @@ function generateShadowRay(intersection, lightSphere) {
 
 function entitiesToDraw(ray, sphere, lightSphere) {
   var entities = [
-    new DrawableEntity(sphere, { strokeStyle: "black", zindex: 1 }),
+    new DrawableEntity(sphere, {
+      strokeStyle: "black",
+      zindex: 1
+    }),
+
     new DrawableEntity(lightSphere, {
       fillStyle: "yellow",
       zindex: 1
     })
   ];
 
-  var raySphereIntersection = new RaySphereIntersection({
-    ray: ray,
-    sphere: sphere
-  });
+  var raySphereIntersection =
+      new RaySphereIntersection(ray, sphere);
 
   if (raySphereIntersection.exists()) {
     var shadowRay = generateShadowRay(raySphereIntersection.point(),
@@ -100,16 +102,12 @@ function entitiesToDraw(ray, sphere, lightSphere) {
       zindex: 1
     }));
 
-    var shadowRaySphereIntersection = new RaySphereIntersection({
-      ray: shadowRay,
-      sphere: sphere
-    });
+    var shadowRaySphereIntersection =
+        new RaySphereIntersection(shadowRay, sphere);
 
     if (!shadowRaySphereIntersection.exists()) {
-      var shadowRayLightIntersection = new RaySphereIntersection({
-        ray: shadowRay,
-        sphere: lightSphere
-      });
+      var shadowRayLightIntersection =
+          new RaySphereIntersection(shadowRay, lightSphere);
 
       entities.push(new DrawableEntity(
         shadowRayLightIntersection.point(), {
