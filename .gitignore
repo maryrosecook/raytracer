@@ -1,3 +1,4 @@
 .DS_Store
 node_modules
 npm-debug.log
+bundle/scene-to-2d.js.map
