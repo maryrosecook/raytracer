@@ -48,10 +48,12 @@
 	var Ray = __webpack_require__(3);
 	var Vector = __webpack_require__(4);
 	var Line = __webpack_require__(5);
+	var Style = __webpack_require__(11);
 	var RaySphereIntersection = __webpack_require__(6);
 	var DrawableEntity = __webpack_require__(7);
 	var drawSceneIn2d = __webpack_require__(8);
 	var drawing = __webpack_require__(9);
+	var geometry2d = __webpack_require__(10);
 	
 	var screen = document
 	    .getElementById("screen")
@@ -59,7 +61,7 @@
 	
 	var primaryRay = new Ray({
 	  origin: new Vector({ x: 50, y: 200, z: 0 }),
-	  direction: vectorFromAngle(0)
+	  direction: geometry2d.vectorFromAngle(0)
 	});
 	
 	var sphere = new Sphere({
@@ -80,38 +82,6 @@
 	  radius: 30
 	});
 	
-	function vectorFromAngle(angle) {
-	  var r = radians(angle);
-	  var up = { x: 0, y: -1 };
-	  var x = Math.cos(r) * up.x - Math.sin(r) * up.y;
-	  var y = Math.sin(r) * up.x + Math.cos(r) * up.y;
-	  return new Vector({ x: x, y: y, z: 0 }).normalize();
-	};
-	
-	function angleFromVector(vector) {
-	  var unitVector = vector.normalize();
-	  var uncorrectedDegrees = degrees(Math.atan2(unitVector.x,
-	                                              -unitVector.y));
-	  var angle = uncorrectedDegrees;
-	  if(uncorrectedDegrees < 0) {
-	    angle = 360 + uncorrectedDegrees;
-	  }
-	
-	  return angle;
-	};
-	
-	function rotateRayTo(ray, angle) {
-	  ray.direction = vectorFromAngle(angle);
-	};
-	
-	function radians(degrees) {
-	  return degrees * Math.PI / 180;
-	};
-	
-	function degrees(radians) {
-	  return radians * 180 / Math.PI;
-	};
-	
 	function generateShadowRay(intersection, lightSphere) {
 	  return new Ray({
 	    origin: intersection,
@@ -119,63 +89,57 @@
 	  });
 	};
 	
-	function entitiesToDraw(ray, sphere, lightSphere) {
-	  var entities = [
-	    new DrawableEntity(sphere, {
-	      strokeStyle: "black",
-	      zindex: 1
-	    }),
+	function shadowRayIntersectionEntities(ray, sphere) {
+	  var entities = [];
 	
-	    new DrawableEntity(lightSphere, {
-	      fillStyle: "yellow",
-	      zindex: 1
-	    })
-	  ];
+	  var shadowRay = generateShadowRay(
+	    new RaySphereIntersection(ray, sphere).point(),
+	    lightSphere);
 	
-	  var raySphereIntersection =
-	      new RaySphereIntersection(ray, sphere);
+	  var shadowRaySphereIntersection =
+	      new RaySphereIntersection(shadowRay, sphere);
 	
-	  if (raySphereIntersection.exists()) {
-	    var shadowRay = generateShadowRay(raySphereIntersection.point(),
-	                                      lightSphere);
+	  if (!shadowRaySphereIntersection.exists()) {
+	    var shadowRayLightIntersection =
+	        new RaySphereIntersection(shadowRay, lightSphere);
 	
-	    var primaryRayLine = new Line({
-	      start: ray.origin, end: raySphereIntersection.point()
-	    });
-	
-	    entities.push(new DrawableEntity(primaryRayLine, {
-	      strokeStyle: "black",
-	      zindex: 1
-	    }));
-	
-	    var shadowRaySphereIntersection =
-	        new RaySphereIntersection(shadowRay, sphere);
-	
-	    if (!shadowRaySphereIntersection.exists()) {
-	      var shadowRayLightIntersection =
-	          new RaySphereIntersection(shadowRay, lightSphere);
-	
-	      entities.push(new DrawableEntity(
-	        shadowRayLightIntersection.point(), {
-	          strokeStyle: "black",
-	          zindex: 2
-	        }));
-	
-	      entities.push(new DrawableEntity(shadowRay, {
+	    entities.push(new DrawableEntity(
+	      shadowRayLightIntersection.point(), {
 	        strokeStyle: "black",
-	        zindex: -1
+	        zindex: 2
 	      }));
-	    }
 	
-	    entities.push(new DrawableEntity(raySphereIntersection.point(), {
-	      strokeStyle: "black",
-	      zindex: 1
-	    }));
-	  } else {
-	    entities.push(new DrawableEntity(ray, {
+	    entities.push(new DrawableEntity(shadowRay, {
 	      strokeStyle: "black",
 	      zindex: -1
 	    }));
+	  }
+	
+	  return entities;
+	};
+	
+	function entitiesToDraw(ray, sphere, lightSphere) {
+	  var entities = [
+	    new DrawableEntity(sphere, new Style()),
+	    new DrawableEntity(lightSphere,
+	                       new Style({ fillStyle: "yellow" }))
+	  ];
+	
+	  if (new RaySphereIntersection(ray, sphere).exists()) {
+	    var primaryRayLine = new Line({
+	      start: ray.origin,
+	      end: new RaySphereIntersection(ray, sphere).point()
+	    });
+	
+	    entities.push(new DrawableEntity(primaryRayLine, new Style()));
+	    entities = entities.concat(
+	      shadowRayIntersectionEntities(ray, sphere));
+	
+	    entities.push(new DrawableEntity(
+	      new RaySphereIntersection(ray, sphere).point(),
+	      new Style()));
+	  } else {
+	    entities.push(new DrawableEntity(ray, new Style({ zindex: -1 })));
 	  }
 	
 	  return entities;
@@ -186,8 +150,9 @@
 	  drawing.setFocus(screen.canvas.width / 2, screen.canvas.height / 2);
 	
 	  (function tick() {
-	    rotateRayTo(primaryRay,
-	                angleFromVector(primaryRay.direction) + 1);
+	    var newDirection = geometry2d.angleFromVector(
+	      primaryRay.direction) + 1;
+	    geometry2d.rotateRayTo(primaryRay, newDirection);
 	    drawSceneIn2d(screen, entitiesToDraw(primaryRay,
 	                                         sphere,
 	                                         lightSphere));
@@ -558,7 +523,7 @@
 	  drawLineBody(screen,
 	               ray.origin,
 	               offscreenRayPoint(ray),
-	               style.strokeStyle);
+	               style);
 	};
 	
 	function drawLine(screen, line, style) {
@@ -567,7 +532,7 @@
 	  drawLineBody(screen,
 	               line.start,
 	               line.end,
-	               style.strokeStyle);
+	               style);
 	};
 	
 	function drawVector(screen, vector, style) {
@@ -668,6 +633,70 @@
 	  setFocus: setFocus,
 	  getFocus: getFocus
 	};
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var Vector = __webpack_require__(4);
+	
+	function vectorFromAngle(angle) {
+	  var r = radians(angle);
+	  var up = { x: 0, y: -1 };
+	  var x = Math.cos(r) * up.x - Math.sin(r) * up.y;
+	  var y = Math.sin(r) * up.x + Math.cos(r) * up.y;
+	  return new Vector({ x: x, y: y, z: 0 }).normalize();
+	};
+	
+	function angleFromVector(vector) {
+	  var unitVector = vector.normalize();
+	  var uncorrectedDegrees = degrees(Math.atan2(unitVector.x,
+	                                              -unitVector.y));
+	  var angle = uncorrectedDegrees;
+	  if(uncorrectedDegrees < 0) {
+	    angle = 360 + uncorrectedDegrees;
+	  }
+	
+	  return angle;
+	};
+	
+	function rotateRayTo(ray, angle) {
+	  ray.direction = vectorFromAngle(angle);
+	};
+	
+	function radians(degrees) {
+	  return degrees * Math.PI / 180;
+	};
+	
+	function degrees(radians) {
+	  return radians * 180 / Math.PI;
+	};
+	
+	module.exports = {
+	  vectorFromAngle: vectorFromAngle,
+	  angleFromVector: angleFromVector,
+	  rotateRayTo: rotateRayTo
+	};
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	function Style(options) {
+	  options = options || {};
+	  if (options.fillStyle) {
+	    this.fillStyle = options.fillStyle;
+	    this.strokeStyle = options.strokeStyle;
+	  } else {
+	    this.strokeStyle = options.strokeStyle || "black";
+	  }
+	
+	  this.zindex = options.zindex !== undefined ? options.zindex : 0;
+	};
+	
+	module.exports = Style;
 
 
 /***/ }

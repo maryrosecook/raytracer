@@ -55,7 +55,7 @@ function drawRay(screen, ray, style) {
   drawLineBody(screen,
                ray.origin,
                offscreenRayPoint(ray),
-               style.strokeStyle);
+               style);
 };
 
 function drawLine(screen, line, style) {
@@ -64,7 +64,7 @@ function drawLine(screen, line, style) {
   drawLineBody(screen,
                line.start,
                line.end,
-               style.strokeStyle);
+               style);
 };
 
 function drawVector(screen, vector, style) {
