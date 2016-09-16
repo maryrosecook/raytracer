@@ -103,27 +103,15 @@
 	    var shadowRayLightIntersection =
 	        new RaySphereIntersection(shadowRay, lightSphere);
 	
-	    entities.push(new DrawableEntity(
-	      shadowRayLightIntersection.point(), {
-	        strokeStyle: "black",
-	        zindex: 2
-	      }));
-	
-	    entities.push(new DrawableEntity(shadowRay, {
-	      strokeStyle: "black",
-	      zindex: -1
-	    }));
+	    entities.push(shadowRayLightIntersection.point(),
+	                  shadowRay);
 	  }
 	
 	  return entities;
 	};
 	
 	function entitiesToDraw(ray, sphere, lightSphere) {
-	  var entities = [
-	    new DrawableEntity(sphere, new Style()),
-	    new DrawableEntity(lightSphere,
-	                       new Style({ fillStyle: "yellow" }))
-	  ];
+	  var entities = [sphere, lightSphere];
 	
 	  if (new RaySphereIntersection(ray, sphere).exists()) {
 	    var primaryRayLine = new Line({
@@ -131,15 +119,13 @@
 	      end: new RaySphereIntersection(ray, sphere).point()
 	    });
 	
-	    entities.push(new DrawableEntity(primaryRayLine, new Style()));
+	    entities.push(primaryRayLine);
 	    entities = entities.concat(
 	      shadowRayIntersectionEntities(ray, sphere));
 	
-	    entities.push(new DrawableEntity(
-	      new RaySphereIntersection(ray, sphere).point(),
-	      new Style()));
+	    entities.push(new RaySphereIntersection(ray, sphere).point());
 	  } else {
-	    entities.push(new DrawableEntity(ray, new Style({ zindex: -1 })));
+	    entities.push(ray);
 	  }
 	
 	  return entities;
@@ -472,26 +458,20 @@
 	var Line = __webpack_require__(5);
 	var drawing = __webpack_require__(9);
 	
-	function drawSceneIn2d(screen, drawableEntities) {
+	function drawSceneIn2d(screen, entities) {
 	  screen.clearRect(0, 0, screen.canvas.width, screen.canvas.height);
-	  drawEntities(screen, drawableEntities);
+	  drawEntities(screen, entities);
 	};
 	
-	function drawEntities(screen, drawableEntities) {
-	  drawableEntities.sort(function(drawableEntity1, drawableEntity2) {
-	    return drawableEntity1.style.zindex -
-	      drawableEntity2.style.zindex;
-	  }).forEach(function(drawableEntity) {
-	    drawFunctionForEntity(drawableEntity)(screen,
-	                                          drawableEntity.entity,
-	                                          drawableEntity.style);
+	function drawEntities(screen, entities) {
+	  entities.forEach(function(entity) {
+	    drawFunctionForEntity(entity)(screen, entity);
 	  });
 	};
 	
-	function drawFunctionForEntity(drawableEntity) {
+	function drawFunctionForEntity(entity) {
 	  return drawFnMappings.filter(function(drawFnMapping) {
-	    return drawableEntity.entity
-	      instanceof drawFnMapping.constructor;
+	    return entity instanceof drawFnMapping.constructor;
 	  })[0].fn;
 	};
 	
@@ -502,45 +482,29 @@
 	  { constructor: Line, fn: drawLine }
 	];
 	
-	function drawSphere(screen, sphere, style) {
-	  if (style.strokeStyle) {
-	    drawing.strokeCircle(screen,
-	                         sphere.center,
-	                         sphere.radius,
-	                         style.strokeStyle);
-	  }
-	
-	  if (style.fillStyle) {
-	    drawing.fillCircle(screen,
+	function drawSphere(screen, sphere) {
+	  drawing.strokeCircle(screen,
 	                       sphere.center,
-	                       sphere.radius,
-	                       style.fillStyle);
-	  }
+	                       sphere.radius);
 	};
 	
-	function drawRay(screen, ray, style) {
-	  drawVector(screen, ray.origin, style);
-	  drawLineBody(screen,
-	               ray.origin,
-	               offscreenRayPoint(ray),
-	               style);
+	function drawRay(screen, ray) {
+	  drawVector(screen, ray.origin);
+	  drawLineBody(screen, ray.origin, offscreenRayPoint(ray));
 	};
 	
-	function drawLine(screen, line, style) {
-	  drawVector(screen, line.start, style);
-	  drawVector(screen, line.end, style);
-	  drawLineBody(screen,
-	               line.start,
-	               line.end,
-	               style);
+	function drawLine(screen, line) {
+	  drawVector(screen, line.start);
+	  drawVector(screen, line.end);
+	  drawLineBody(screen, line.start, line.end);
 	};
 	
-	function drawVector(screen, vector, style) {
-	  drawing.strokeCircle(screen, vector, 5, style.strokeStyle);
+	function drawVector(screen, vector) {
+	  drawing.strokeCircle(screen, vector, 5);
 	};
 	
-	function drawLineBody(screen, start, end, style) {
-	  drawing.strokeLine(screen, start, end, style.strokeStyle);
+	function drawLineBody(screen, start, end) {
+	  drawing.strokeLine(screen, start, end);
 	};
 	
 	function offscreenRayPoint(ray) {

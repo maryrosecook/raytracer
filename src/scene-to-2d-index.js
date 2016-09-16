@@ -57,27 +57,15 @@ function shadowRayIntersectionEntities(ray, sphere) {
     var shadowRayLightIntersection =
         new RaySphereIntersection(shadowRay, lightSphere);
 
-    entities.push(new DrawableEntity(
-      shadowRayLightIntersection.point(), {
-        strokeStyle: "black",
-        zindex: 2
-      }));
-
-    entities.push(new DrawableEntity(shadowRay, {
-      strokeStyle: "black",
-      zindex: -1
-    }));
+    entities.push(shadowRayLightIntersection.point(),
+                  shadowRay);
   }
 
   return entities;
 };
 
 function entitiesToDraw(ray, sphere, lightSphere) {
-  var entities = [
-    new DrawableEntity(sphere, new Style()),
-    new DrawableEntity(lightSphere,
-                       new Style({ fillStyle: "yellow" }))
-  ];
+  var entities = [sphere, lightSphere];
 
   if (new RaySphereIntersection(ray, sphere).exists()) {
     var primaryRayLine = new Line({
@@ -85,15 +73,13 @@ function entitiesToDraw(ray, sphere, lightSphere) {
       end: new RaySphereIntersection(ray, sphere).point()
     });
 
-    entities.push(new DrawableEntity(primaryRayLine, new Style()));
+    entities.push(primaryRayLine);
     entities = entities.concat(
       shadowRayIntersectionEntities(ray, sphere));
 
-    entities.push(new DrawableEntity(
-      new RaySphereIntersection(ray, sphere).point(),
-      new Style()));
+    entities.push(new RaySphereIntersection(ray, sphere).point());
   } else {
-    entities.push(new DrawableEntity(ray, new Style({ zindex: -1 })));
+    entities.push(ray);
   }
 
   return entities;
