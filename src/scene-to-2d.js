@@ -1,53 +1,78 @@
 var Sphere = require("./sphere");
 var Ray = require("./ray");
 var Vector = require("./vector");
+var Line = require("./line");
 var drawing = require("./drawing");
 
-function drawSceneIn2d(screen, ray, sphere) {
+function drawSceneIn2d(screen, drawableEntities) {
   screen.clearRect(0, 0, screen.canvas.width, screen.canvas.height);
-  drawEntities(screen, [ray, sphere]);
-  drawIntersections(screen, ray, sphere);
+  drawEntities(screen, drawableEntities);
 };
 
-function drawEntities(screen, entities) {
-  entities.forEach(function(entity) {
-    drawFunctionForEntity(entity)(screen, entity);
+function drawEntities(screen, drawableEntities) {
+  drawableEntities.sort(function(drawableEntity1, drawableEntity2) {
+    return drawableEntity1.style.zindex -
+      drawableEntity2.style.zindex;
+  }).forEach(function(drawableEntity) {
+    drawFunctionForEntity(drawableEntity)(screen,
+                                          drawableEntity.entity,
+                                          drawableEntity.style);
   });
 };
 
-function drawIntersections(screen, ray, sphere) {
-  if (ray.isIntersecting(sphere)) {
-    var intersectionPoint = ray.intersectionPoint(sphere);
-    drawPoint(screen, intersectionPoint);
-  }
-};
-
-function drawFunctionForEntity(entity) {
+function drawFunctionForEntity(drawableEntity) {
   return drawFnMappings.filter(function(drawFnMapping) {
-    return entity instanceof drawFnMapping.constructor;
+    return drawableEntity.entity
+      instanceof drawFnMapping.constructor;
   })[0].fn;
 };
 
 var drawFnMappings = [
   { constructor: Sphere, fn: drawSphere },
-  { constructor: Ray, fn: drawRay }
+  { constructor: Ray, fn: drawRay },
+  { constructor: Vector, fn: drawVector },
+  { constructor: Line, fn: drawLine }
 ];
 
-function drawSphere(screen, sphere) {
-  drawing.strokeCircle(screen, sphere.center, sphere.radius);
+function drawSphere(screen, sphere, style) {
+  if (style.strokeStyle) {
+    drawing.strokeCircle(screen,
+                         sphere.center,
+                         sphere.radius,
+                         style.strokeStyle);
+  }
+
+  if (style.fillStyle) {
+    drawing.fillCircle(screen,
+                       sphere.center,
+                       sphere.radius,
+                       style.fillStyle);
+  }
 };
 
-function drawRay(screen, ray) {
-  drawPoint(screen, ray.origin);
-  drawRayLine(screen, ray);
+function drawRay(screen, ray, style) {
+  drawVector(screen, ray.origin, style);
+  drawLineBody(screen,
+               ray.origin,
+               offscreenRayPoint(ray),
+               style.strokeStyle);
 };
 
-function drawPoint(screen, point) {
-  drawing.strokeCircle(screen, point, 5);
+function drawLine(screen, line, style) {
+  drawVector(screen, line.start, style);
+  drawVector(screen, line.end, style);
+  drawLineBody(screen,
+               line.start,
+               line.end,
+               style.strokeStyle);
 };
 
-function drawRayLine(screen, ray) {
-  drawing.strokeLine(screen, ray.origin, offscreenRayPoint(ray));
+function drawVector(screen, vector, style) {
+  drawing.strokeCircle(screen, vector, 5, style.strokeStyle);
+};
+
+function drawLineBody(screen, start, end, style) {
+  drawing.strokeLine(screen, start, end, style.strokeStyle);
 };
 
 function offscreenRayPoint(ray) {
