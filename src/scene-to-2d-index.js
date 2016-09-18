@@ -13,6 +13,8 @@ var screen = document
     .getElementById("screen")
     .getContext("2d");
 
+var DIMENSIONS = ["x", "y"];
+
 var primaryRay = new Ray({
   origin: new Vector({ x: 50, y: 200, z: 0 }),
   direction: geometry2d.vectorFromAngle(0)
