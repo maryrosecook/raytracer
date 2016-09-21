@@ -48,7 +48,6 @@
 	var Ray = __webpack_require__(3);
 	var Vector = __webpack_require__(4);
 	var Line = __webpack_require__(5);
-	var Style = __webpack_require__(11);
 	var RaySphereIntersection = __webpack_require__(6);
 	var DrawableEntity = __webpack_require__(7);
 	var drawSceneIn2d = __webpack_require__(8);
@@ -59,10 +58,12 @@
 	    .getElementById("screen")
 	    .getContext("2d");
 	
+	var DIMENSIONS = ["y", "z"];
+	
 	var primaryRay = new Ray({
-	  origin: new Vector({ x: 50, y: 200, z: 0 }),
+	  origin: new Vector({ x: -50, y: 50, z: 0 }),
 	  direction: geometry2d.vectorFromAngle(0)
-	});
+	}).filterDimensions(DIMENSIONS);
 	
 	var sphere = new Sphere({
 	  center: new Vector({
@@ -71,16 +72,16 @@
 	    z: 0
 	  }),
 	  radius: 100
-	});
+	}).filterDimensions(DIMENSIONS);
 	
 	var lightSphere = new Sphere({
 	  center: new Vector({
 	    x: 50,
 	    y: 0,
-	    z: 0
+	    z: -100
 	  }),
 	  radius: 30
-	});
+	}).filterDimensions(DIMENSIONS);
 	
 	function generateShadowRay(intersection, lightSphere) {
 	  return new Ray({
@@ -133,11 +134,11 @@
 	
 	(function start() {
 	  drawing.setCanvasSize(screen, 500, 500);
-	  drawing.setFocus(screen.canvas.width / 2, screen.canvas.height / 2);
 	
 	  (function tick() {
 	    var newDirection = geometry2d.angleFromVector(
 	      primaryRay.direction) + 1;
+	    drawing.setFocus(primaryRay.origin);
 	    geometry2d.rotateRayTo(primaryRay, newDirection);
 	    drawSceneIn2d(screen, entitiesToDraw(primaryRay,
 	                                         sphere,
@@ -155,10 +156,22 @@
 	
 	function Sphere(options) {
 	  checkObjectAttributes(options, ["center", "radius"]);
-	  checkObjectAttributes(options.center, ["x", "y", "z"]);
+	  options.center.checkIsValid();
 	
 	  this.center = options.center.copy();
 	  this.radius = options.radius;
+	};
+	
+	Sphere.prototype = {
+	  copy: function() {
+	    return new Sphere(this);
+	  },
+	
+	  filterDimensions: function(dimensions) {
+	    var filteredSphere = this.copy();
+	    filteredSphere.center = this.center.filterDimensions(dimensions);
+	    return filteredSphere;
+	  }
 	};
 	
 	module.exports = Sphere;
@@ -196,9 +209,24 @@
 	
 	function Ray(options) {
 	  checkObjectAttributes(options, ["origin", "direction"]);
+	  options.origin.checkIsValid();
+	  options.direction.checkIsValid();
 	
 	  this.origin = options.origin.copy();
 	  this.direction = options.direction.copy();
+	};
+	
+	Ray.prototype = {
+	  copy: function() {
+	    return new Ray(this);
+	  },
+	
+	  filterDimensions: function(dimensions) {
+	    var filteredRay = this.copy();
+	    filteredRay.origin = this.origin.filterDimensions(dimensions);
+	    filteredRay.direction = this.direction.filterDimensions(dimensions);
+	    return filteredRay;
+	  }
 	};
 	
 	module.exports = Ray;
@@ -210,88 +238,133 @@
 
 	var checkObjectAttributes = __webpack_require__(2);
 	
+	var DIMENSIONS = ["x", "y", "z"];
+	
 	function Vector(options) {
-	  this.x = options.x;
-	  this.y = options.y;
-	  this.z = options.z;
+	  var self = this;
+	
+	  this._setDimensions(options);
+	
+	  this.dimensions
+	    .forEach(function(dimension) {
+	      self[dimension] = options[dimension];
+	    });
 	
 	  this.checkIsValid();
 	};
 	
 	Vector.prototype = {
 	  checkIsValid: function() {
-	    checkIsNumber(this.x);
-	    checkIsNumber(this.y);
-	    checkIsNumber(this.z);
+	    var self = this;
+	    this.dimensions
+	      .map(function(dimension) { return self[dimension]; })
+	      .forEach(checkIsNumber);
 	  },
 	
 	  copy: function() {
 	    this.checkIsValid();
-	
-	    return new Vector({
-	      x: this.x,
-	      y: this.y,
-	      z: this.z
-	    });
+	    return new Vector(this);
 	  },
 	
 	  multiplyByScalar: function(scalar) {
 	    this.checkIsValid();
 	    checkIsNumber(scalar);
 	
-	    return new Vector({
-	      x: this.x * scalar,
-	      y: this.y * scalar,
-	      z: this.z * scalar
-	    });
+	    var self = this;
+	    var vectorObj = this.dimensions
+	        .reduce(function(vectorObj, dimension) {
+	          vectorObj[dimension] = self[dimension] * scalar;
+	          return vectorObj;
+	        }, {});
+	
+	    return new Vector(vectorObj);
 	  },
 	
 	  add: function(vector) {
 	    this.checkIsValid();
 	    vector.checkIsValid();
 	
-	    return new Vector({
-	      x: this.x + vector.x,
-	      y: this.y + vector.y,
-	      z: this.z + vector.z
-	    });
+	    var self = this;
+	    var vectorObj = this.dimensions
+	        .reduce(function(vectorObj, dimension) {
+	          vectorObj[dimension] = self[dimension] + vector[dimension];
+	          return vectorObj;
+	        }, {});
+	
+	    return new Vector(vectorObj);
 	  },
 	
 	  subtract: function(vector) {
 	    this.checkIsValid()
 	    vector.checkIsValid();
 	
-	    return new Vector({
-	      x: this.x - vector.x,
-	      y: this.y - vector.y,
-	      z: this.z - vector.z
-	    });
+	    var self = this;
+	    var vectorObj = this.dimensions
+	        .reduce(function(vectorObj, dimension) {
+	          vectorObj[dimension] = self[dimension] - vector[dimension];
+	          return vectorObj;
+	        }, {});
+	
+	    return new Vector(vectorObj);
 	  },
 	
 	  magnitude: function() {
 	    this.checkIsValid();
-	    return Math.sqrt(Math.pow(this.x, 2) +
-	                     Math.pow(this.y, 2) +
-	                     Math.pow(this.z, 2));
+	
+	    var self = this;
+	    var squaredSum = this.dimensions
+	        .map(function(dimension) {
+	          return Math.pow(self[dimension], 2);
+	        })
+	        .reduce(function(sum, squared) {
+	          return sum + squared;
+	        });
+	
+	    return Math.sqrt(squaredSum);
 	  },
 	
 	  normalize: function() {
 	    this.checkIsValid();
 	    var vectorMagnitude = this.magnitude();
-	    return new Vector({
-	      x: this.x / vectorMagnitude,
-	      y: this.y / vectorMagnitude,
-	      z: this.z / vectorMagnitude,
-	    });
+	
+	    var self = this;
+	    var vectorObj = this.dimensions
+	        .reduce(function(vectorObj, dimension) {
+	          vectorObj[dimension] = self[dimension] / vectorMagnitude;
+	          return vectorObj;
+	        }, {});
+	
+	    return new Vector(vectorObj);
 	  },
 	
 	  dotProduct: function(vector) {
 	    this.checkIsValid()
 	    vector.checkIsValid();
 	
-	    return this.x * vector.x +
-	      this.y * vector.y +
-	      this.z * vector.z;
+	    var self = this;
+	    return this.dimensions
+	        .map(function(dimension) {
+	          return self[dimension] * vector[dimension];
+	        })
+	        .reduce(function(sum, squared) {
+	          return sum + squared;
+	        });
+	  },
+	
+	  filterDimensions: function(dimensions) {
+	    var self = this;
+	    var vectorObj = dimensions
+	        .reduce(function(vectorObj, dimension, i) {
+	          vectorObj[DIMENSIONS[i]] = self[dimension];
+	          return vectorObj;
+	        }, {});
+	
+	    return new Vector(vectorObj);
+	  },
+	
+	  _setDimensions: function(options) {
+	    this.dimensions = DIMENSIONS
+	      .filter(function(dimension) { return dimension in options; });
 	  }
 	};
 	
@@ -642,25 +715,6 @@
 	  angleFromVector: angleFromVector,
 	  rotateRayTo: rotateRayTo
 	};
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports) {
-
-	function Style(options) {
-	  options = options || {};
-	  if (options.fillStyle) {
-	    this.fillStyle = options.fillStyle;
-	    this.strokeStyle = options.strokeStyle;
-	  } else {
-	    this.strokeStyle = options.strokeStyle || "black";
-	  }
-	
-	  this.zindex = options.zindex !== undefined ? options.zindex : 0;
-	};
-	
-	module.exports = Style;
 
 
 /***/ }

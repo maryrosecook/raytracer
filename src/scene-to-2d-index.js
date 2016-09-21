@@ -2,7 +2,6 @@ var Sphere = require("./sphere");
 var Ray = require("./ray");
 var Vector = require("./vector");
 var Line = require("./line");
-var Style = require("./style");
 var RaySphereIntersection = require("./ray-sphere-intersection");
 var DrawableEntity = require("./drawable-entity");
 var drawSceneIn2d = require("./scene-to-2d");
@@ -13,12 +12,12 @@ var screen = document
     .getElementById("screen")
     .getContext("2d");
 
-var DIMENSIONS = ["x", "y"];
+var DIMENSIONS = ["y", "z"];
 
 var primaryRay = new Ray({
-  origin: new Vector({ x: 50, y: 200, z: 0 }),
+  origin: new Vector({ x: -50, y: 50, z: 0 }),
   direction: geometry2d.vectorFromAngle(0)
-});
+}).filterDimensions(DIMENSIONS);
 
 var sphere = new Sphere({
   center: new Vector({
@@ -27,16 +26,16 @@ var sphere = new Sphere({
     z: 0
   }),
   radius: 100
-});
+}).filterDimensions(DIMENSIONS);
 
 var lightSphere = new Sphere({
   center: new Vector({
     x: 50,
     y: 0,
-    z: 0
+    z: -100
   }),
   radius: 30
-});
+}).filterDimensions(DIMENSIONS);
 
 function generateShadowRay(intersection, lightSphere) {
   return new Ray({
@@ -89,11 +88,11 @@ function entitiesToDraw(ray, sphere, lightSphere) {
 
 (function start() {
   drawing.setCanvasSize(screen, 500, 500);
-  drawing.setFocus(screen.canvas.width / 2, screen.canvas.height / 2);
 
   (function tick() {
     var newDirection = geometry2d.angleFromVector(
       primaryRay.direction) + 1;
+    drawing.setFocus(primaryRay.origin);
     geometry2d.rotateRayTo(primaryRay, newDirection);
     drawSceneIn2d(screen, entitiesToDraw(primaryRay,
                                          sphere,
