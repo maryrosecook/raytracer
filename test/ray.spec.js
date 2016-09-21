@@ -38,4 +38,31 @@ describe("ray", function() {
       expect(ray.direction.z).to.equal(6);
     });
   });
+
+  describe("#copy", function() {
+    it("should create copy with same data", function() {
+      var ray = new Ray({
+        origin: new Vector({ x: 1, y: 2, z: 3 }),
+        direction: new Vector({ x: 4, y: 5, z: 6 })
+      });
+
+      var copy = ray.copy();
+      expect(copy.origin.x).to.equal(ray.origin.x);
+      expect(copy.origin.y).to.equal(ray.origin.y);
+      expect(copy.origin.z).to.equal(ray.origin.z);
+    });
+
+    it("shouldn't change copy if orig changes", function() {
+      var ray = new Ray({
+        origin: new Vector({ x: 1, y: 2, z: 3 }),
+        direction: new Vector({ x: 4, y: 5, z: 6 })
+      });
+
+      var copy = ray.copy();
+      ray.origin.x = 7;
+      ray.direction.x = 8;
+      expect(copy.origin.x).to.equal(1);
+      expect(copy.direction.x).to.equal(4);
+    });
+  });
 });
