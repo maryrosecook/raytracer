@@ -1,4 +1,5 @@
 var Sphere = require("./sphere");
+var Cuboid = require("./cuboid");
 var Ray = require("./ray");
 var Vector = require("./vector");
 var Line = require("./line");
@@ -12,10 +13,10 @@ var screen = document
     .getElementById("screen")
     .getContext("2d");
 
-var DIMENSIONS = ["y", "z"];
+var DIMENSIONS = ["x", "y"];
 
 var primaryRay = new Ray({
-  origin: new Vector({ x: -50, y: 50, z: 0 }),
+  origin: new Vector({ x: -100, y: 150, z: 0 }),
   direction: geometry2d.vectorFromAngle(0)
 }).filterDimensions(DIMENSIONS);
 
@@ -26,6 +27,19 @@ var sphere = new Sphere({
     z: 0
   }),
   radius: 100
+}).filterDimensions(DIMENSIONS);
+
+var projectionScreen = new Cuboid({
+  center: new Vector({
+    x: 0,
+    y: 200,
+    z: 0
+  }),
+  dimensions: new Vector({
+    x: 1,
+    y: 200,
+    z: 200
+  })
 }).filterDimensions(DIMENSIONS);
 
 var lightSphere = new Sphere({
@@ -65,8 +79,8 @@ function shadowRayIntersectionEntities(ray, sphere) {
   return entities;
 };
 
-function entitiesToDraw(ray, sphere, lightSphere) {
-  var entities = [sphere, lightSphere];
+function entitiesToDraw(ray, sphere, lightSphere, projectionScreen) {
+  var entities = [sphere, lightSphere, projectionScreen];
 
   if (new RaySphereIntersection(ray, sphere).exists()) {
     var primaryRayLine = new Line({
@@ -96,7 +110,8 @@ function entitiesToDraw(ray, sphere, lightSphere) {
     geometry2d.rotateRayTo(primaryRay, newDirection);
     drawSceneIn2d(screen, entitiesToDraw(primaryRay,
                                          sphere,
-                                         lightSphere));
+                                         lightSphere,
+                                         projectionScreen));
     requestAnimationFrame(tick);
   })();
 })();

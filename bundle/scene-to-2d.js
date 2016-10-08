@@ -45,6 +45,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sphere = __webpack_require__(1);
+	var Cuboid = __webpack_require__(11);
 	var Ray = __webpack_require__(3);
 	var Vector = __webpack_require__(4);
 	var Line = __webpack_require__(5);
@@ -58,10 +59,10 @@
 	    .getElementById("screen")
 	    .getContext("2d");
 	
-	var DIMENSIONS = ["y", "z"];
+	var DIMENSIONS = ["x", "y"];
 	
 	var primaryRay = new Ray({
-	  origin: new Vector({ x: -50, y: 50, z: 0 }),
+	  origin: new Vector({ x: -100, y: 150, z: 0 }),
 	  direction: geometry2d.vectorFromAngle(0)
 	}).filterDimensions(DIMENSIONS);
 	
@@ -72,6 +73,19 @@
 	    z: 0
 	  }),
 	  radius: 100
+	}).filterDimensions(DIMENSIONS);
+	
+	var projectionScreen = new Cuboid({
+	  center: new Vector({
+	    x: 0,
+	    y: 200,
+	    z: 0
+	  }),
+	  dimensions: new Vector({
+	    x: 1,
+	    y: 200,
+	    z: 200
+	  })
 	}).filterDimensions(DIMENSIONS);
 	
 	var lightSphere = new Sphere({
@@ -111,8 +125,8 @@
 	  return entities;
 	};
 	
-	function entitiesToDraw(ray, sphere, lightSphere) {
-	  var entities = [sphere, lightSphere];
+	function entitiesToDraw(ray, sphere, lightSphere, projectionScreen) {
+	  var entities = [sphere, lightSphere, projectionScreen];
 	
 	  if (new RaySphereIntersection(ray, sphere).exists()) {
 	    var primaryRayLine = new Line({
@@ -142,7 +156,8 @@
 	    geometry2d.rotateRayTo(primaryRay, newDirection);
 	    drawSceneIn2d(screen, entitiesToDraw(primaryRay,
 	                                         sphere,
-	                                         lightSphere));
+	                                         lightSphere,
+	                                         projectionScreen));
 	    requestAnimationFrame(tick);
 	  })();
 	})();
@@ -526,6 +541,7 @@
 /***/ function(module, exports, __webpack_require__) {
 
 	var Sphere = __webpack_require__(1);
+	var Cuboid = __webpack_require__(11);
 	var Ray = __webpack_require__(3);
 	var Vector = __webpack_require__(4);
 	var Line = __webpack_require__(5);
@@ -550,6 +566,7 @@
 	
 	var drawFnMappings = [
 	  { constructor: Sphere, fn: drawSphere },
+	  { constructor: Cuboid, fn: drawCuboid },
 	  { constructor: Ray, fn: drawRay },
 	  { constructor: Vector, fn: drawVector },
 	  { constructor: Line, fn: drawLine }
@@ -559,6 +576,12 @@
 	  drawing.strokeCircle(screen,
 	                       sphere.center,
 	                       sphere.radius);
+	};
+	
+	function drawCuboid(screen, cuboid) {
+	  drawing.strokeRect(screen,
+	                     cuboid.center,
+	                     cuboid.dimensions);
 	};
 	
 	function drawRay(screen, ray) {
@@ -619,19 +642,21 @@
 	  unscaleAndUnfocus(screen);
 	};
 	
+	function strokeRect(screen, center, size, strokeStyle) {
+	  scaleAndFocus(screen);
+	  screen.strokeStyle = strokeStyle;
+	  screen.strokeRect(center.x - size.x / 2,
+	                    center.y - size.y / 2,
+	                    size.x,
+	                    size.y);
+	  unscaleAndUnfocus(screen);
+	};
+	
 	function strokeCircle(screen, center, radius, strokeStyle) {
 	  scaleAndFocus(screen);
 	  defineCircle(screen, center, radius);
 	  screen.strokeStyle = strokeStyle;
 	  screen.stroke();
-	  unscaleAndUnfocus(screen);
-	};
-	
-	function fillCircle(screen, center, radius, fillStyle) {
-	  scaleAndFocus(screen);
-	  defineCircle(screen, center, radius);
-	  screen.fillStyle = fillStyle;
-	  screen.fill();
 	  unscaleAndUnfocus(screen);
 	};
 	
@@ -665,7 +690,7 @@
 	module.exports = {
 	  strokeLine: strokeLine,
 	  strokeCircle: strokeCircle,
-	  fillCircle: fillCircle,
+	  strokeRect: strokeRect,
 	  setCanvasSize: setCanvasSize,
 	  setFocus: setFocus,
 	  getFocus: getFocus
@@ -715,6 +740,36 @@
 	  angleFromVector: angleFromVector,
 	  rotateRayTo: rotateRayTo
 	};
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var checkObjectAttributes = __webpack_require__(2);
+	
+	function Cuboid(options) {
+	  checkObjectAttributes(options, ["center", "dimensions"]);
+	  options.center.checkIsValid();
+	  options.dimensions.checkIsValid();
+	
+	  this.center = options.center.copy();
+	  this.dimensions = options.dimensions.copy();
+	};
+	
+	Cuboid.prototype = {
+	  copy: function() {
+	    return new Cuboid(this);
+	  },
+	
+	  filterDimensions: function(dimensions) {
+	    var filteredCuboid = this.copy();
+	    filteredCuboid.center = this.center.filterDimensions(dimensions);
+	    return filteredCuboid;
+	  }
+	};
+	
+	module.exports = Cuboid;
 
 
 /***/ }

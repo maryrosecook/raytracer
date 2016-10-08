@@ -1,4 +1,5 @@
 var Sphere = require("./sphere");
+var Cuboid = require("./cuboid");
 var Ray = require("./ray");
 var Vector = require("./vector");
 var Line = require("./line");
@@ -23,6 +24,7 @@ function drawFunctionForEntity(entity) {
 
 var drawFnMappings = [
   { constructor: Sphere, fn: drawSphere },
+  { constructor: Cuboid, fn: drawCuboid },
   { constructor: Ray, fn: drawRay },
   { constructor: Vector, fn: drawVector },
   { constructor: Line, fn: drawLine }
@@ -32,6 +34,12 @@ function drawSphere(screen, sphere) {
   drawing.strokeCircle(screen,
                        sphere.center,
                        sphere.radius);
+};
+
+function drawCuboid(screen, cuboid) {
+  drawing.strokeRect(screen,
+                     cuboid.center,
+                     cuboid.dimensions);
 };
 
 function drawRay(screen, ray) {

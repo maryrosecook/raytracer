@@ -26,19 +26,21 @@ function strokeLine(screen, start, end, strokeStyle) {
   unscaleAndUnfocus(screen);
 };
 
+function strokeRect(screen, center, size, strokeStyle) {
+  scaleAndFocus(screen);
+  screen.strokeStyle = strokeStyle;
+  screen.strokeRect(center.x - size.x / 2,
+                    center.y - size.y / 2,
+                    size.x,
+                    size.y);
+  unscaleAndUnfocus(screen);
+};
+
 function strokeCircle(screen, center, radius, strokeStyle) {
   scaleAndFocus(screen);
   defineCircle(screen, center, radius);
   screen.strokeStyle = strokeStyle;
   screen.stroke();
-  unscaleAndUnfocus(screen);
-};
-
-function fillCircle(screen, center, radius, fillStyle) {
-  scaleAndFocus(screen);
-  defineCircle(screen, center, radius);
-  screen.fillStyle = fillStyle;
-  screen.fill();
   unscaleAndUnfocus(screen);
 };
 
@@ -72,7 +74,7 @@ function getFocus() {
 module.exports = {
   strokeLine: strokeLine,
   strokeCircle: strokeCircle,
-  fillCircle: fillCircle,
+  strokeRect: strokeRect,
   setCanvasSize: setCanvasSize,
   setFocus: setFocus,
   getFocus: getFocus
